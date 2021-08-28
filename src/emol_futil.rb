@@ -15,7 +15,7 @@ require 'gsl'
             end
             typeprint( value[ value.length-1 ], " ]", oport )
             oport.printf "%s", sep
-        elsif ( value.instance_of?( Fixnum ) ) then
+        elsif ( value.instance_of?( (RUBY_VERSION.to_f >= 2.4 ? Integer : Fixnum) ) ) then
             oport.printf "%d%s",     value, sep
         elsif ( value.instance_of?( Float  ) ) then
             oport.printf "%22.15e%s", value, sep
@@ -37,7 +37,7 @@ require 'gsl'
              obj.instance_of?( GSL::Vector ) ||
              obj.instance_of?( GSL::Matrix ) ) then
             lenprt = 10000000000
-            if    ( obj[ 0 ].instance_of?( Fixnum ) ) then
+            if    ( obj[ 0 ].instance_of?( (RUBY_VERSION.to_f >= 2.4 ? Integer : Fixnum)) ) then
                 lenprt = 10
             elsif ( obj[ 0 ].instance_of?( Float  ) ) then
                 lenprt = 4 
@@ -74,8 +74,10 @@ require 'gsl'
                     oport.printf "[ "
                     for i in 0...(size-1) do
                         #oport.printf "all: value: %s: \"%s\"\n", obj[ i ].class, obj[ i ]
-                        if ( obj[ i ].instance_of?( Fixnum ) ) || ( obj[ i ].instance_of?( Float ) ) ||
-                           ( obj[ i ].instance_of?( String ) ) || ( obj[ i ].instance_of?( Array ) ) then
+                        if ( obj[ i ].instance_of?( (RUBY_VERSION.to_f >= 2.4 ? Integer : Fixnum)) ) ||
+                           ( obj[ i ].instance_of?( Float ) ) ||
+                           ( obj[ i ].instance_of?( String ) ) ||
+                           ( obj[ i ].instance_of?( Array ) ) then
                             typeprint( obj[ i ], ", ", oport )
                         else
                             lenprt = 5
@@ -86,8 +88,10 @@ require 'gsl'
                         #end
                         #ip += 1
                     end
-                    if ( obj[ obj.length-1 ].instance_of?( Fixnum ) ) || ( obj[ obj.length-1 ].instance_of?( Float ) ) ||
-                       ( obj[ obj.length-1 ].instance_of?( String ) ) || ( obj[ obj.length-1 ].instance_of?( Array ) ) then
+                    if ( obj[ obj.length-1 ].instance_of?( (RUBY_VERSION.to_f >= 2.4 ? Integer : Fixnum)) ) ||
+                       ( obj[ obj.length-1 ].instance_of?( Float ) ) ||
+                       ( obj[ obj.length-1 ].instance_of?( String ) ) ||
+                       ( obj[ obj.length-1 ].instance_of?( Array ) ) then
                         typeprint( obj[ obj.length - 1 ], "", oport )
                     else
                         oport.printf( "%s.new ( ) ", obj[ obj.length - 1 ].class )
@@ -98,7 +102,7 @@ require 'gsl'
 
                     ###
                     #for i in 0...obj.length do
-                    #    if ( obj[ i ].instance_of?( Fixnum ) ) || ( obj[ i ].instance_of?( Float  ) ) ||
+                    #    if ( obj[ i ].instance_of?( (RUBY_VERSION.to_f >= 2.4 ? Integer : Fixnum)) ) || ( obj[ i ].instance_of?( Float  ) ) ||
                     #                                             ( obj[ i ].instance_of?( String ) ) then
                     #    else
                     #        p obj, obj.class
@@ -204,7 +208,7 @@ require 'gsl'
 ##                    oport.printf "\n"
 ##                else
 ##                    value = object
-##                    if    ( value.instance_of?( Fixnum ) ) then
+##                    if    ( value.instance_of?( (RUBY_VERSION.to_f >= 2.4 ? Integer : Fixnum)) ) then
 ##                        oport.printf "%4d\n",     value
 ##                    elsif ( value.instance_of?( Float )  ) then
 ##                        oport.printf "%25.16e\n", value
