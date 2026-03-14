@@ -306,6 +306,11 @@ def rhf( molinfo, s, h, nz_g )
   # 最終全エネルギー計算
   elec_energy  = (dao.get_body * (h + f)).trace / 2.0
   total_energy = elec_energy + molinfo.get_e_nucl
+
+  printf( "\n Nuclear repulsion energy : %28.16e\n", molinfo.get_e_nucl )
+  printf( " Electronic energy       : %28.16e\n", elec_energy )
+  printf( " Total HF energy         : %28.16e\n", total_energy )
+
 #
   EmolUtil::print_2dim_ary_with_value_moname(cao.submatrix(nil, 0...nocc).to_a, eval.to_a, molinfo.get_bs_name, 
 	     "Occupied Orbital Energies and MO Coefficients", 8, "%12.6f")

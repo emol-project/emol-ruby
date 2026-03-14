@@ -1,129 +1,83 @@
-require 'fileutils'
+# extconf.rb for Molint (libcint backend)
+#
+# Usage:
+#   ruby extconf.rb
+#   make          # builds Molint.so and copies it to ../../src/
+#
 require 'mkmf'
-create_makefile( 'Molint' )
 
-################################################
-################################################
-################################################
-uname                   = `uname`
-uname.chop!
-################################################
-dir_target              = "../../src/"
-fort_basenames          = [ "trnpp", "trnsps", "trnrr" ]
-include_additional_dir  = [ "/opt/local/include", "/Library/Ruby/Site/1.8/universal-darwin11.0", "./", "./include/", "./include/trn/" ]
-library_additional_dir  = [ "/opt/local/lib/ruby/vendor_ruby/1.8/i686-darwin11/", "/opt/local/lib/ruby/vendor_ruby/1.8/", "/Library/Ruby/Site/1.8/universal-darwin11.0", "./" ]
-library_additional_item = [ ]
-cc                      = "gcc"
-fc                      = "gfortran"
-fflags                  = "-fPIC -O3"
-echo                    = "echo"
-qadd                    = "V = 1\nQ1 = $(V:1=)\nQ = $(Q1:0=@)"
-vval                    = "1"
-
-###############
-srcfort_add = ""
-#fort_basenames.each do
-#    |basename|
-#    srcfort_add += " " + basename + ".f"
-#end
-##printf "%s\n", srcfort_add
-###############
-objfort_add = ""
-#fort_basenames.each do
-#    |basename|
-#    objfort_add += " " + basename + ".o"
-#end
-##printf "%s\n", objfort_add
-###############
-inc_add_flag = ""
-include_additional_dir.each do
-    |dir|
-    inc_add_flag += "-I" + dir + " "
-end
-#printf "%s\n", inc_add_flag
-##############
-lib_add_flag = ""
-library_additional_dir.each do
-    |dir|
-    lib_add_flag += "-L" + dir + " "
-end
-#printf "%s\n", inc_add_flag
-##############
-library_add_flag = ""
-library_additional_item.each do
-    |item|
-    library_add_flag += "-l" + item + " "
-end
-#printf "%s\n", library_add_flag
-##############
-file         = "Makefile"
-file_tmp     = "Makefile.tmp"
-sbst_echo    = "ECHO = "     + echo
-sbst_qadd    = ""            + qadd
-sbst_vval    = "V = "        + vval
-sbst_target  = "-o "         + dir_target + "$@"
-sbst_srcf    = "SRCF = "     + srcfort_add
-sbst_cc      = "CC = "       + cc
-sbst_fc      = "FC = "       + fc
-sbst_fflags  = "FFLAGS = "   + fflags
-sbst_include = "INCFLAGS = " + inc_add_flag
-sbst_libpath = "LIBPATH = "  + lib_add_flag
-sbst_library = "LIBS = "     + library_add_flag
-sbst_suffix0 = ".f.o:"
-sbst_suffix1 = "	$(ECHO) compiling $(<)"
-sbst_suffix2 = "	$(Q) $(FC) $(FFLAGS) -c $<"
-
-#printf "%s\n", sbst_include
-
-port_r = open( file,     "r" )
-port_w = open( file_tmp, "w" )
-
-port_w.puts sbst_echo
-port_w.puts sbst_qadd
-begin
-    port_r.each_line { |line|
-        new_line = line
-        if ( uname == "Darwin" ) then
-            new_line = new_line.gsub( /-arch[ ][ ]*i386/, "" )
-            new_line = new_line.gsub( /-arch[ ][ ]*x86_64/, "" )
-            new_line = new_line.gsub( /-arch[ ][ ]*x86_64/, "" )
-            new_line = new_line.sub( /-Wshorten-64-to-32/, "" )
-            new_line = new_line.sub( /-Wdivision-by-zero/, "" )
-            new_line = new_line.sub( /-Wextra-tokens/, "" )
-        end
-        if new_line.index( /^CC =[ ][ ]*.*$/ ) then
-            new_line = new_line.sub( /^CC =[ ][ ]*.*$/,    sbst_cc      )
-            port_w.puts new_line
-            port_w.puts sbst_fc
-        elsif new_line.index( /^CFLAGS[ ][ ]*.*$/ ) then
-            port_w.puts new_line
-            port_w.puts sbst_fflags
-        elsif new_line.index( /^SRCS[ ][ ]*.*$/ ) then
-            port_w.puts new_line
-            port_w.puts sbst_srcf
-        elsif new_line.index( /^.*DLLIB.* Makefile$/ ) then
-#            puts new_line
-            port_w.puts sbst_suffix0
-            port_w.puts sbst_suffix1
-            port_w.puts sbst_suffix2
-            port_w.puts ""
-            port_w.puts new_line
-        elsif new_line.index( /^OBJS =[ ][ ]*/ ) then
-            new_line = new_line.chop + objfort_add
-            port_w.puts new_line
-        else
-            new_line = new_line.sub( /^V =[ ][ ]*.*/,      sbst_vval    )
-            new_line = new_line.sub( /-o[ ][ ]*\$@/,       sbst_target  )
-            new_line = new_line.sub( /^INCFLAGS =[ ][ ]*/, sbst_include )
-            new_line = new_line.sub( /^LIBPATH =[ ][ ]*/,  sbst_libpath )
-            new_line = new_line.sub( /^LIBS =[ ][ ]*/,     sbst_library )
-            new_line = new_line.sub( /^LIBS =[ ][ ]*/,     sbst_library )
-            port_w.puts new_line
-        end
-    }
-ensure
-    port_r.close
-    port_w.close
+# 1. Search paths for macOS Homebrew
+if RUBY_PLATFORM =~ /darwin/
+  ['/opt/homebrew/opt', '/usr/local/opt'].each do |brew_path|
+    if Dir.exist?(brew_path)
+      ['openblas', 'lapack', 'libcint'].each do |pkg|
+        dir_config(pkg, "#{brew_path}/#{pkg}/include", "#{brew_path}/#{pkg}/lib")
+      end
+    end
+  end
 end
 
-FileUtils.mv( file_tmp, file )
+# 2. Find BLAS / LAPACK (prefer OpenBLAS over reference Netlib)
+found_linear_algebra = false
+
+if have_library('openblas', 'dgemm_')
+  found_linear_algebra = true
+  have_library('lapack', 'dgesv_')  # may be needed separately
+else
+  puts "OpenBLAS not found. Trying reference BLAS and LAPACK..."
+  if have_library('blas', 'dgemm_') && have_library('lapack', 'dgesv_')
+    found_linear_algebra = true
+  end
+end
+
+unless found_linear_algebra
+  abort "*** ERROR: BLAS/LAPACK not found. ***\n" \
+        "Please install: \n" \
+        "  Debian/Ubuntu: libopenblas-dev or liblapack-dev\n" \
+        "  Fedora: openblas-devel or lapack-devel\n" \
+        "  macOS: brew install openblas lapack"
+end
+
+# 3. Find libcint (check LIBCINT_DIR env variable first)
+if ENV['LIBCINT_DIR']
+  dir_config('cint', "#{ENV['LIBCINT_DIR']}/include", "#{ENV['LIBCINT_DIR']}/lib")
+  $LDFLAGS += " -Wl,-rpath,#{ENV['LIBCINT_DIR']}/lib"
+else
+  dir_config('cint')
+end
+
+$libs = append_library($libs, 'm')
+
+unless have_library('cint', 'cint2e_cart')
+  abort "*** ERROR: libcint not found. ***"
+end
+
+# 4. Check headers
+unless have_header('cint.h')
+  abort "*** ERROR: cint.h not found. ***"
+end
+
+have_header('cint_funcs.h')  # present in v6, absent in v3 (optional)
+
+# 5. Compiler flags
+$CFLAGS += " -O3 -std=c99 -fPIC"
+
+create_makefile('Molint')
+
+# 6. Append a post-build copy rule to install Molint.so into ../../src/
+target_dir = File.expand_path('../../src', __dir__)
+
+so_ext = (RUBY_PLATFORM =~ /darwin/) ? 'bundle' : 'so'
+
+open('Makefile', 'a') do |f|
+  f.puts
+  f.puts "# --- post-build copy rule (appended by extconf.rb) ---"
+  f.puts "TARGET_DIR = #{target_dir}"
+  f.puts
+  f.puts "all: install_to_src"
+  f.puts
+  f.puts "install_to_src: $(DLLIB)"
+  f.puts "\t@mkdir -p $(TARGET_DIR)"
+  f.puts "\t@cp $(DLLIB) $(TARGET_DIR)/"
+  f.puts "\t@echo '>>> Molint.#{so_ext} copied to $(TARGET_DIR)/'"
+end

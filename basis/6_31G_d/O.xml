@@ -1,0 +1,54 @@
+<basis_set id="O:6-31G(d)">
+<information symbol_element="O" type="gtf" contraction_pattern="[3s2p1d]{631/31/1}" configuration="1s(2)2s(2)2p(4)" term_symbol="3P">
+<reference>
+<author>
+6-31G(d) from GAMESS</author>
+</reference>
+<keywords>
+all_electron;non-relativistic;gtf</keywords>
+</information>
+<body>
+<basis scaling="1.0" l="0">
+<primitive zeta="5484.6716600" coef="0.001831074430">
+</primitive>
+<primitive zeta="825.2349460" coef="0.013950172200">
+</primitive>
+<primitive zeta="188.0469580" coef="0.068445078098">
+</primitive>
+<primitive zeta="52.9645000" coef="0.232714335992">
+</primitive>
+<primitive zeta="16.8975704" coef="0.470192897984">
+</primitive>
+<primitive zeta="5.7996353" coef="0.358520852987">
+</primitive>
+</basis>
+<basis scaling="1.0" l="0">
+<primitive zeta="15.5396162" coef="-0.110777549525">
+</primitive>
+<primitive zeta="3.5999336" coef="-0.148026262701">
+</primitive>
+<primitive zeta="1.0137618" coef="1.130767015354">
+</primitive>
+</basis>
+<basis scaling="1.0" l="0">
+<primitive zeta="0.2700058" coef="1.000000000000">
+</primitive>
+</basis>
+<basis scaling="1.0" l="1">
+<primitive zeta="15.5396162" coef="0.070874268231">
+</primitive>
+<primitive zeta="3.5999336" coef="0.339752839147">
+</primitive>
+<primitive zeta="1.0137618" coef="0.727158577316">
+</primitive>
+</basis>
+<basis scaling="1.0" l="1">
+<primitive zeta="0.2700058" coef="1.000000000000">
+</primitive>
+</basis>
+<basis scaling="1.0" l="2">
+<primitive zeta="0.8000000" coef="1.000000000000">
+</primitive>
+</basis>
+</body>
+</basis_set>
