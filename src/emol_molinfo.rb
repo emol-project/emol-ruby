@@ -1,7 +1,7 @@
 require_relative "emol_rexml"
 
 class Molinfo
-    attr_accessor :charge, :spin, :numb_shell, :numb_atm, :numb_prim,
+    attr_accessor :charge, :spin, :numb_shell, :numb_atm, :numb_prim, :angular_type,
                   :shel_lqn, :shel_atm, :shel_tem, :shel_add, :shel_ini,
                   :atom_charg, :atom_xyz, :prim_exp, :prim_coe, :bs_name, :bs_atm,
                   :thr_ovch, :level_print, :len_lqn, :nel, :nbf, :e_nucl,
@@ -11,42 +11,43 @@ class Molinfo
 		  :thresh_hf, :thresh_ci, :thresh_mcscf
   def initialize( obj = nil )
       if obj.nil? then
-          @charge      = 0.0e0
-          @spin        = 0
-          @numb_shell  = 0
-          @numb_atm    = 0
-          @numb_prim   = 0
-          @shel_lqn    = []
-          @shel_atm    = []
-          @shel_tem    = []
-          @shel_add    = []
-          @shel_ini    = []
-          @atom_charg  = []
-          @atom_xyz    = []
-          @prim_exp    = []
-          @prim_coe    = []
-          @thr_ovch    = 0.0e0
-          @level_print = 0
-          @len_lqn     = []
-          @nel         = 0
-          @nbf         = 0
-          @e_nucl      = 0.0e0
+          @charge        = 0.0e0
+          @spin          = 0
+          @numb_shell    = 0
+          @numb_atm      = 0
+          @numb_prim     = 0
+          @angular_type  = 0
+          @shel_lqn      = []
+          @shel_atm      = []
+          @shel_tem      = []
+          @shel_add      = []
+          @shel_ini      = []
+          @atom_charg    = []
+          @atom_xyz      = []
+          @prim_exp      = []
+          @prim_coe      = []
+          @thr_ovch      = 0.0e0
+          @level_print   = 0
+          @len_lqn       = []
+          @nel           = 0
+          @nbf           = 0
+          @e_nucl        = 0.0e0
+ 
+          @n_frozen      = 0
+          @n_core        = 0
+          @n_active      = 0
+          @n_external    = 0
+          @nob           = 0
+          @e_core        = 0.0e0
+          @nstate        = 0
 
-          @n_frozen    = 0
-          @n_core      = 0
-          @n_active    = 0
-          @n_external  = 0
-          @nob         = 0
-          @e_core      = 0.0e0
-          @nstate      = 0
-
-	  @istate      = 0
-	  @max_iteration = 0
-	  @energy_shift  = 0.0
-
-	  @thresh_hf = 0.0
-	  @thresh_ci = 0.0
-	  @thresh_mcscf = 0.0
+	        @istate        = 0
+	        @max_iteration = 0
+	        @energy_shift  = 0.0
+      
+	        @thresh_hf     = 0.0
+	        @thresh_ci     = 0.0
+	        @thresh_mcscf = 0.0
 	  
           return
       end
@@ -55,95 +56,103 @@ class Molinfo
           inp = Mkinput.new( fname )
           inp.show
       
-          @charge = inp.get_charge
-          @spin = inp.get_spin
-          @numb_shell = inp.get_numb_shell
-          @numb_atm  = inp.get_numb_atm
-          @numb_prim  = inp.get_numb_prim
-          @shel_lqn   = inp.get_shel_lqn
-          @shel_atm   = inp.get_shel_atm
-          @shel_tem   = inp.get_shel_tem
-          @shel_add   = inp.get_shel_add
-          @shel_ini   = inp.get_shel_ini
-          @bs_name    = inp.get_bs_name
-          @bs_atm     = inp.get_bs_atm
-          @atom_charg = inp.get_charg
-          @atom_xyz   = inp.get_atom_xyz
-          @prim_exp   = inp.get_prim_exp
-          @prim_coe   = inp.get_prim_coe
-          @thr_ovch   = 1.0e+30
-          @level_print = 0
+          @charge       = inp.get_charge
+          @spin         = inp.get_spin
+          @numb_shell   = inp.get_numb_shell
+          @numb_atm     = inp.get_numb_atm
+          @numb_prim    = inp.get_numb_prim
+          @angular_type = inp.get_angular_type
+          @shel_lqn     = inp.get_shel_lqn
+          @shel_atm     = inp.get_shel_atm
+          @shel_tem     = inp.get_shel_tem
+          @shel_add     = inp.get_shel_add
+          @shel_ini     = inp.get_shel_ini
+          @bs_name      = inp.get_bs_name
+          @bs_atm       = inp.get_bs_atm
+          @atom_charg   = inp.get_charg
+          @atom_xyz     = inp.get_atom_xyz
+          @prim_exp     = inp.get_prim_exp
+          @prim_coe     = inp.get_prim_coe
+          @thr_ovch     = 1.0e+30
+          @level_print  = 0
       
-          @len_lqn = [1, 3, 6, 10, 15, 21, 28]
-          @nel = (@atom_charg.sum - @charge).to_i
-          @nbf = @shel_ini[ @shel_ini.size - 1 ] + @len_lqn[ @shel_lqn[ @shel_lqn.size - 1 ]]
+          @len_lqn      = [1, 3, 6, 10, 15, 21, 28]
+          @angular_type = inp.respond_to?(:get_angular_type) ? inp.get_angular_type : 0
+          if (@angular_type == 1) then
+            @len_lqn    = [1, 3, 5,  7,  9, 11, 13]    # spherical
+          else
+            @len_lqn    = [1, 3, 6, 10, 15, 21, 28]   # cartesian
+          end
+          @nel          = (@atom_charg.sum - @charge).to_i
+          @nbf          = @shel_ini[ @shel_ini.size - 1 ] + @len_lqn[ @shel_lqn[ @shel_lqn.size - 1 ]]
       
           @e_nucl = 0.0
           for i in 1..@numb_atm-1
             for j in 0..i-1
-              @e_nucl += @atom_charg[i] * @atom_charg[j] / Math.sqrt( (@atom_xyz[i*3  ] - @atom_xyz[j*3  ])**2 +
-                                                                      (@atom_xyz[i*3+1] - @atom_xyz[j*3+1])**2 +
-                                                                      (@atom_xyz[i*3+2] - @atom_xyz[j*3+2])**2 )
+              @e_nucl  += @atom_charg[i] * @atom_charg[j] / Math.sqrt( (@atom_xyz[i*3  ] - @atom_xyz[j*3  ])**2 +
+                                                                       (@atom_xyz[i*3+1] - @atom_xyz[j*3+1])**2 +
+                                                                       (@atom_xyz[i*3+2] - @atom_xyz[j*3+2])**2 )
             end
           end
 
-          @n_frozen    = inp.get_n_frozen
-          @n_core      = inp.get_n_core
-          @n_active    = inp.get_n_active
-          @n_external  = inp.get_n_external
-          @nob         = @n_core + @n_active + @n_external
-          @e_core      = 0.0e0
+          @n_frozen       = inp.get_n_frozen
+          @n_core         = inp.get_n_core
+          @n_active       = inp.get_n_active
+          @n_external     = inp.get_n_external
+          @nob            = @n_core + @n_active + @n_external
+          @e_core         = 0.0e0
           @flg_use_symbol = inp.get_flg_use_symbol
           @flg_use_csymb  = inp.get_flg_use_csymb
-          @nstate      = inp.get_nstate
+          @nstate         = inp.get_nstate
 
-	  @thresh_hf    = inp.get_thresh_hf
-	  @thresh_ci    = inp.get_thresh_ci
-	  @thresh_mcscf = inp.get_thresh_mcscf
-	  @istate        = inp.get_istate
-	  @max_iteration = inp.get_max_iteration
-	  @energy_shift  = inp.get_energy_shift
+	        @thresh_hf      = inp.get_thresh_hf
+	        @thresh_ci      = inp.get_thresh_ci
+	        @thresh_mcscf   = inp.get_thresh_mcscf
+	        @istate         = inp.get_istate
+	        @max_iteration  = inp.get_max_iteration
+	        @energy_shift   = inp.get_energy_shift
 
       elsif ( obj.instance_of?( Molinfo ) ) then
-          @charge      = obj.charge
-          @spin        = obj.spin
-          @numb_shell  = obj.numb_shell
-          @numb_atm    = obj.numb_atm
-          @numb_prim   = obj.numb_prim
-          @shel_lqn    = obj.shel_lqn
-          @shel_atm    = obj.shel_atm
-          @shel_tem    = obj.shel_tem
-          @shel_add    = obj.shel_add
-          @shel_ini    = obj.shel_ini
-          @atom_charg  = obj.atom_charg
-          @atom_xyz    = obj.atom_xyz
-          @prim_exp    = obj.prim_exp
-          @prim_coe    = obj.prim_coe
-          @thr_ovch    = obj.thr_ovch
-          @level_print = obj.level_print
-          @len_lqn     = obj.len_lqn
-          @bs_name     = obj.bs_name
-          @bs_atm      = obj.bs_atm
-          @nel         = obj.nel
-          @nbf         = obj.nbf
-          @e_nucl      = obj.e_nucl
-
-          @n_frozen    = obj.n_frozen
-          @n_core      = obj.n_core
-          @n_active    = obj.n_active
-          @n_external  = obj.n_external
-          @nob         = obj.nob
-          @e_core      = obj.e_core
+          @charge         = obj.charge
+          @spin           = obj.spin
+          @numb_shell     = obj.numb_shell
+          @numb_atm       = obj.numb_atm
+          @numb_prim      = obj.numb_prim
+          @angular_type   = obj.angular_type
+          @shel_lqn       = obj.shel_lqn
+          @shel_atm       = obj.shel_atm
+          @shel_tem       = obj.shel_tem
+          @shel_add       = obj.shel_add
+          @shel_ini       = obj.shel_ini
+          @atom_charg     = obj.atom_charg
+          @atom_xyz       = obj.atom_xyz
+          @prim_exp       = obj.prim_exp
+          @prim_coe       = obj.prim_coe
+          @thr_ovch       = obj.thr_ovch
+          @level_print    = obj.level_print
+          @len_lqn        = obj.len_lqn
+          @bs_name        = obj.bs_name
+          @bs_atm         = obj.bs_atm
+          @nel            = obj.nel
+          @nbf            = obj.nbf
+          @e_nucl         = obj.e_nucl
+   
+          @n_frozen       = obj.n_frozen
+          @n_core         = obj.n_core
+          @n_active       = obj.n_active
+          @n_external     = obj.n_external
+          @nob            = obj.nob
+          @e_core         = obj.e_core
           @flg_use_symbol = obj.flg_use_symbol
           @flg_use_csymb  = obj.flg_use_csymb 
-          @nstate      = obj.nstate
-	  @thresh_hf     = obj.get_thresh_hf
-	  @thresh_ci     = obj.get_thresh_ci
-	  @thresh_mcscf  = obj.get_thresh_mcscf
-
-	  @istate        = obj.get_state
-	  @max_iteration = obj.get_max_iteration
-	  @energy_shift  = obj.get_energy_shift
+          @nstate         = obj.nstate
+	        @thresh_hf      = obj.get_thresh_hf
+	        @thresh_ci      = obj.get_thresh_ci
+	        @thresh_mcscf   = obj.get_thresh_mcscf
+       
+	        @istate         = obj.get_state
+	        @max_iteration  = obj.get_max_iteration
+	        @energy_shift   = obj.get_energy_shift
       else  
       end
   end
@@ -166,6 +175,10 @@ class Molinfo
 
   def get_numb_prim
     @numb_prim
+  end
+
+  def get_angular_type
+    @angular_type
   end
 
   def get_shel_lqn

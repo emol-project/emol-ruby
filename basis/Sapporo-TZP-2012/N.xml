@@ -1,0 +1,60 @@
+<basis_set id="N:SPK:OPT:NON:[6s4p2d1f]{411211/1311/21/2}">
+  <information symbol_element="N" type="gtf" total_energy="" contraction_pattern="[6s4p2d1f]{411211/1311/21/2}">
+    <reference>
+      <author>T. Noro</author>
+      <author>M. Sekiya</author>
+      <author>T. Koga</author>
+      <journal></journal>
+    </reference>
+    <keywords>all_electron;non_relativistic;gtf</keywords>
+  </information>
+  <body>
+    <basis scaling="1.0" l="0">
+      <primitive zeta="3856.2068590" coef="0.0063490"></primitive>
+      <primitive zeta="579.1574600" coef="0.0484600"></primitive>
+      <primitive zeta="131.7433600" coef="0.2364080"></primitive>
+      <primitive zeta="37.0425410" coef="0.7867850"></primitive>
+    </basis>
+    <basis scaling="1.0" l="0">
+      <primitive zeta="11.8197380" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="0">
+      <primitive zeta="3.9709940" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="0">
+      <primitive zeta="7.2064940" coef="-0.2124200"></primitive>
+      <primitive zeta="0.7738780" coef="1.0786700"></primitive>
+    </basis>
+    <basis scaling="1.0" l="0">
+      <primitive zeta="0.3000840" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="0">
+      <primitive zeta="0.1238360" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="1">
+      <primitive zeta="18.1442220" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="1">
+      <primitive zeta="26.6028040" coef="0.0398410"></primitive>
+      <primitive zeta="5.9420010" coef="0.2491070"></primitive>
+      <primitive zeta="1.7406590" coef="0.8103620"></primitive>
+    </basis>
+    <basis scaling="1.0" l="1">
+      <primitive zeta="0.5545280" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="1">
+      <primitive zeta="0.1723670" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="2">
+      <primitive zeta="4.5862240" coef="0.1180460"></primitive>
+      <primitive zeta="1.3187720" coef="0.9326950"></primitive>
+    </basis>
+    <basis scaling="1.0" l="2">
+      <primitive zeta="0.4213840" coef="1.0000000"></primitive>
+    </basis>
+    <basis scaling="1.0" l="3">
+      <primitive zeta="1.8264550" coef="0.4239549"></primitive>
+      <primitive zeta="0.6221640" coef="0.7064247"></primitive>
+    </basis>
+  </body>
+</basis_set>

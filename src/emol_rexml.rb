@@ -184,8 +184,18 @@ class Mkinput
                       "S"  => 16,
                       "Cl" => 17, "CL" => 17,
                       "Ar" => 18, "AR" => 18 }
-    l_name = [ ["S"], ["X", "Y", "Z"], ["XX", "YY", "ZZ", "XY", "XZ", "YZ"], ["XXX", "YYY", "ZZZ", "XXY", "XXZ", "XYY", "YYZ", "XZZ", "YZZ", "XYZ" ] ] 
-    l_degeneracy = [1, 3, 6, 10, 15, 21, 28]
+    l_name_cart = [["S"],
+                  ["X", "Y", "Z"],
+                  ["XX", "YY", "ZZ", "XY", "XZ", "YZ"],
+                  ["XXX", "YYY", "ZZZ", "XXY", "XXZ", "XYY", "YYZ", "XZZ", "YZZ", "XYZ"],
+                  ["XXXX", "YYYY", "ZZZZ", "XXXY", "XXXZ", "XYYY", "YYYZ", "XZZZ", "YZZZ", "XXYY", "XXZZ", "YYZZ", "XXYZ", "XYYZ", "XYZZ"]]
+    l_name_sph = [["S"],
+                  ["X", "Y", "Z"],
+                  ["D-2", "D-1", "D0", "D+1", "D+2"],
+                  ["F-3", "F-2", "F-1", "F0", "F+1", "F+2", "F+3"],
+                  ["G-4", "G-3", "G-2", "G-1", "G0", "G+1", "G+2", "G+3", "G+4"]]
+    l_degeneracy_cart = [1, 3, 6, 10, 15, 21, 28]
+    l_degeneracy_sph  = [1, 3, 5,  7,  9, 11, 13]
     @numb_shell = 0; @numb_prim = 0; @numb_atm = 0
     @shel_lqn = []; @shel_atm = []; @shel_tem = []; @shel_add = []; @shel_ini = []
     @atom_charg = []; @atom_xyz = []
@@ -206,7 +216,7 @@ class Mkinput
 
     if ( items[ "mol" ] ) then
         @charge         = items[ "mol" ][ "charge"    ][ 0 ].to_f
- 	@thresh_hf      = items[ "mol" ][ "thresh_hf" ][ 0 ].to_f
+        @thresh_hf      = items[ "mol" ][ "thresh_hf" ][ 0 ].to_f
         if ( items[ "mol" ][ "basis" ] ) then
             @name_basis = items[ "mol" ][ "basis"    ][ 0 ]
         else
@@ -214,7 +224,10 @@ class Mkinput
         end
         atom_and_xyz    = items[ "mol" ][ "atom_xyz" ]
         @numb_atm       = atom_and_xyz.length / 4
+        @angular_type   = items[ "mol" ][ "angular_type" ][ 0 ].to_i
     end
+    l_name              = (@angular_type == 1) ? l_name_sph : l_name_cart
+    l_degeneracy        = (@angular_type == 1) ? l_degeneracy_sph : l_degeneracy_cart
 
     if ( items[ "expr" ] ) then
         @spin           = items[ "expr"  ][ "spin"     ][ 0 ].to_i
@@ -228,7 +241,7 @@ class Mkinput
 
     if ( items[ "ci" ] ) then
         @nstate         = items[ "ci"  ][ "nstate"   ][ 0 ].to_i
- 	@thresh_ci      = items[ "ci"  ][ "thresh_ci"    ][ 0 ].to_f
+        @thresh_ci      = items[ "ci"  ][ "thresh_ci"    ][ 0 ].to_f
     end
 
     if ( items[ "mcscf" ] ) then
@@ -416,6 +429,10 @@ class Mkinput
 
   def get_prim_coe
     @prim_coe
+  end
+
+  def get_angular_type
+    @angular_type
   end
 
   def get_nstate

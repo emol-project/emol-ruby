@@ -1,0 +1,47 @@
+#
+#    Notice: 0. Conventional? namelist input format.
+#            1. Don't insert blank characters between item-name and "=".
+#            2. Don't forget commas after all items.
+#            3. All characters located after "#" are parsed as comments.
+#            4. If there are multiple item-names belonging to same field name,
+#               last-item's data are effective.
+#
+
+#    atom_xyz= C,  0.0000000000000000e+00,  0.0000000000000000e+00,  0.0000000000000000e+00,
+#              H,  3.1810598479000000e+00,  0.0000000000000000e+00,  2.2494039600000000e+00,
+#              H, -3.1810598479000000e+00,  0.0000000000000000e+00,  2.2494039600000000e+00,
+#              H,  0.0000000000000000e+00,  3.1810598479000000e+00, -2.2494039600000000e+00,
+#              H,  0.0000000000000000e+00, -3.1810598479000000e+00, -2.2494039600000000e+00,
+
+$mol
+    charge= 0.0, basis= Sapporo-TZP-2012, angular_type= 1,
+    thresh_hf=0.00000000001, #1.0e-11,
+    atom_xyz= C,  0.0000000000000000e+00,  0.0000000000000000e+00,  0.0000000000000000e+00,
+              H,  1.6833445000000000e+00,  0.0000000000000000e+00,  1.1903334000000000e+00,
+              H, -1.6833445000000000e+00,  0.0000000000000000e+00,  1.1903334000000000e+00,
+              H,  0.0000000000000000e+00,  1.6833445000000000e+00, -1.1903334000000000e+00,
+              H,  0.0000000000000000e+00, -1.6833445000000000e+00, -1.1903334000000000e+00,
+$end
+
+$expr
+    # Information for generating DRT
+    spin=   0,                                     # singlet
+    fzcore= 0, core= 2, active= 6, external= 15,
+    #fzcore= 0, core= 1, active= 8, external= 14,
+    #fzcore= 3, core= 0, active= 4, external= 6,
+    flg_use_symbol=  0,                            # 0 ( False ) or others ( True )
+    flg_use_csymb=   0,                            # 0 ( False ) or others ( True )
+$end
+
+$ci
+    # Number of CI states
+    nstate=1, 
+    thresh_ci=1.0e-7,
+$end
+
+$mcscf
+    istate=1,
+    thresh_mcscf=1.0e-6,
+    max_iteration=70,
+    energy_shift=2.5,
+$end

@@ -11,6 +11,7 @@ numb_atom  = 2
 atom_charg = [1.0, 1.0]
 atom_xyz   = [0.0, 0.0, 0.0,   # H1
               0.0, 0.0, 1.4]   # H2 (1.4 bohr apart)
+angular_type = 1
 
 # STO-3G basis for H: 1s shell = 3 primitives
 # exponents and contraction coefficients (already including normalization)
@@ -54,7 +55,7 @@ sint = Sint0.new
 sint.init(numb_atom, numb_shell, numb_prim,
           shel_lqn, shel_tem, shel_atm, shel_add,
           atom_charg, atom_xyz, prim_exp, prim_coe,
-          tol, level_print)
+          tol, level_print, angular_type)
 
 puts "Overlap integrals:"
 for ish in 0...numb_shell
@@ -71,7 +72,7 @@ tint = Tint0.new
 tint.init(numb_atom, numb_shell, numb_prim,
           shel_lqn, shel_tem, shel_atm, shel_add,
           atom_charg, atom_xyz, prim_exp, prim_coe,
-          tol, level_print)
+          tol, level_print, angular_type)
 
 puts "Kinetic energy integrals:"
 for ish in 0...numb_shell
@@ -87,7 +88,7 @@ vint = Vint0.new
 vint.init(numb_atom, numb_shell, numb_prim,
           shel_lqn, shel_tem, shel_atm, shel_add,
           atom_charg, atom_xyz, prim_exp, prim_coe,
-          tol, level_print)
+          tol, level_print, angular_type)
 
 puts "Nuclear attraction integrals:"
 for ish in 0...numb_shell
@@ -103,7 +104,7 @@ eris = Eri0.new
 eris.init(numb_atom, numb_shell, numb_prim,
           shel_lqn, shel_tem, shel_atm, shel_add,
           atom_charg, atom_xyz, prim_exp, prim_coe,
-          tol, level_print)
+          tol, level_print, angular_type)
 
 puts "Two-electron integrals (selected):"
 for ish in 0...numb_shell

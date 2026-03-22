@@ -1,4 +1,4 @@
-# extconf.rb for Molint (libcint backend)
+# extconf.rb for Molint (libcint backend, spherical harmonics version)
 #
 # Usage:
 #   ruby extconf.rb

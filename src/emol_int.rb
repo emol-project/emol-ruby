@@ -9,44 +9,59 @@ def emol_int( molinfo )
   vint = Vint0.new
   eris = Eri0.new
 
-  charge     = molinfo.get_charge
-  numb_shell = molinfo.get_numb_shell
-  numb_atom   = molinfo.get_numb_atm
-  numb_prim  = molinfo.get_numb_prim
-  shel_lqn   = molinfo.get_shel_lqn
-  shel_atm   = molinfo.get_shel_atm
-  shel_tem   = molinfo.get_shel_tem
-  shel_add   = molinfo.get_shel_add
-  shel_ini   = molinfo.get_shel_ini
-  atom_charg = molinfo.get_atom_charg
-  atom_xyz   = molinfo.get_atom_xyz
-  prim_exp   = molinfo.get_prim_exp
-  prim_coe   = molinfo.get_prim_coe
-  len_lqn    = molinfo.get_len_lqn
-  nbf        = molinfo.get_nbf
+  charge       = molinfo.get_charge
+  numb_shell   = molinfo.get_numb_shell
+  numb_atom    = molinfo.get_numb_atm
+  numb_prim    = molinfo.get_numb_prim
+  angular_type = molinfo.get_angular_type
+  shel_lqn     = molinfo.get_shel_lqn
+  shel_atm     = molinfo.get_shel_atm
+  shel_tem     = molinfo.get_shel_tem
+  shel_add     = molinfo.get_shel_add
+  shel_ini     = molinfo.get_shel_ini
+  atom_charg   = molinfo.get_atom_charg
+  atom_xyz     = molinfo.get_atom_xyz
+  prim_exp     = molinfo.get_prim_exp
+  prim_coe     = molinfo.get_prim_coe
+  len_lqn      = molinfo.get_len_lqn
+  nbf          = molinfo.get_nbf
+  thr_ovch     = molinfo.get_thr_ovch
+  level_print  = molinfo.get_level_print
 
-  thr_ovch   = molinfo.get_thr_ovch
-  level_print= molinfo.get_level_print
+  # --- debug ---
+  expected_ini = 0
+  numb_shell.times do |ish|
+    if shel_ini[ish] != expected_ini
+      STDERR.printf("BUG: shel_ini[%d]=%d, expected=%d\n",
+                    ish, shel_ini[ish], expected_ini)
+    end
+    expected_ini += len_lqn[shel_lqn[ish]]
+  end
+  STDERR.printf("DEBUG: angular=%d nbf=%d expected_nbf=%d\n",
+                molinfo.get_angular_type, nbf, expected_ini)
+  # --- end debug ---
+
+
 
   sint.init( numb_atom, numb_shell, numb_prim,
              shel_lqn, shel_tem, shel_atm, shel_add,
              atom_charg, atom_xyz, prim_exp, prim_coe,
-             thr_ovch, level_print )
+             thr_ovch, level_print, angular_type )
 
   tint.init( numb_atom, numb_shell, numb_prim,
              shel_lqn, shel_tem, shel_atm, shel_add,
              atom_charg, atom_xyz, prim_exp, prim_coe,
-             thr_ovch, level_print )
+             thr_ovch, level_print, angular_type )
 
   vint.init( numb_atom, numb_shell, numb_prim,
              shel_lqn, shel_tem, shel_atm, shel_add,
              atom_charg, atom_xyz, prim_exp, prim_coe,
-             thr_ovch, level_print )
+             thr_ovch, level_print, angular_type )
 
   eris.init( numb_atom, numb_shell, numb_prim,
              shel_lqn, shel_tem, shel_atm, shel_add,
              atom_charg, atom_xyz, prim_exp, prim_coe,
-             thr_ovch, level_print )
+             thr_ovch, level_print, angular_type )
 
   s, t, v, h = calc_hmat( numb_shell, shel_lqn, shel_atm, shel_ini, sint, tint, vint, len_lqn, nbf )
   nz_g = mk_eris( numb_shell, shel_lqn, shel_atm, shel_ini, eris, len_lqn, nbf )
