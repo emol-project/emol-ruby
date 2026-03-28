@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+#
+#  emol_nl.rb
+#
+#  SimpleNameList : parser for NameList-style input files
+#
+
 class SimpleNameList
     def initialize( _filename = nil, _key_field = "$", _end_field = "$end", _septoken = ",", _comments_regexp = /#|!/ )
         @filename = _filename
@@ -114,11 +121,109 @@ class SimpleNameList
     end
 
     ######################################################
+    #  parse : read input, parse it, and return the items dictionary
+    #          (original behavior, unchanged)
+    ######################################################
     def parse
         strfile = readline 
         fields = split_to_field( strfile )
         items  = parse_allfield( fields )
         return items
+    end
+
+    ######################################################
+    #  parse_with_defaults : parse the input and then merge
+    #  default values into the result.  Keys that already
+    #  exist in the user's input are kept as-is; only missing
+    #  sections and keys are filled in from the defaults.
+    #
+    #  defaults : a Hash with the same structure as the items
+    #             dictionary returned by parse, e.g.
+    #             { "section" => { "key" => [ "value", ... ] } }
+    #             (see emol_defaults.rb for the concrete definition)
+    #
+    #  Usage:
+    #    nl = SimpleNameList.new( filename )
+    #    items = nl.parse_with_defaults( MKINPUT_DEFAULTS )
+    #
+    ######################################################
+    def parse_with_defaults( defaults )
+        items = parse
+        merge_defaults( items, defaults )
+        return items
+    end
+
+    ######################################################
+    #  nl_fetch (class method)
+    #
+    #  Safely fetch a value from the parsed items dictionary.
+    #  If the section or key is missing (e.g. due to a missing
+    #  entry in the defaults definition), print a warning to
+    #  stderr and return a safe fallback value instead of
+    #  crashing with NoMethodError on nil.
+    #
+    #  Parameters:
+    #    items     - the parsed items dictionary
+    #    section   - NameList section name (e.g. "mol")
+    #    key       - key name within the section (e.g. "charge")
+    #    as_array  - if true, fallback is [] (for array-valued keys)
+    #                if false (default), fallback is ["0"]
+    #
+    #  Returns:
+    #    The value array (e.g. ["1.0e-10"]) if found,
+    #    or the fallback value if not found.
+    #
+    #  Usage:
+    #    @charge = SimpleNameList.nl_fetch(items, "mol", "charge")[0].to_f
+    #    atom_xyz = SimpleNameList.nl_fetch(items, "mol", "atom_xyz", true)
+    #
+    ######################################################
+    def self.nl_fetch( items, section, key, as_array = false )
+        if items[ section ] && items[ section ][ key ]
+            return items[ section ][ key ]
+        end
+        if as_array
+            fallback = []
+        else
+            fallback = [ "0" ]
+        end
+        $stderr.printf( "Warning: NameList key '%s/%s' not found " +
+                        "in input or defaults. Using fallback: %s\n",
+                        section, key, fallback.inspect )
+        return fallback
+    end
+
+    private
+
+    ######################################################
+    #  merge_defaults : fill missing entries in the items
+    #  dictionary with values from the defaults Hash.
+    #
+    #  Rules:
+    #    - If an entire section is absent, add the whole
+    #      section from defaults.
+    #    - If a section exists but a key is missing, add
+    #      only that key from defaults.
+    #    - If a key already exists, do NOT overwrite it
+    #      (user input always takes priority).
+    ######################################################
+    def merge_defaults( items, defaults )
+        defaults.each do | section, keys |
+            if !items[ section ]
+                # Section itself is absent -- add the whole section
+                items[ section ] = {}
+                keys.each do | key, val |
+                    items[ section ][ key ] = val.clone
+                end
+            else
+                # Section exists -- fill in only the missing keys
+                keys.each do | key, val |
+                    if !items[ section ][ key ]
+                        items[ section ][ key ] = val.clone
+                    end
+                end
+            end
+        end
     end
 
 end

@@ -146,13 +146,13 @@ class Molinfo
           @flg_use_symbol = obj.flg_use_symbol
           @flg_use_csymb  = obj.flg_use_csymb 
           @nstate         = obj.nstate
-	        @thresh_hf      = obj.get_thresh_hf
-	        @thresh_ci      = obj.get_thresh_ci
-	        @thresh_mcscf   = obj.get_thresh_mcscf
+	        @thresh_hf      = obj.thresh_hf
+	        @thresh_ci      = obj.thresh_ci
+	        @thresh_mcscf   = obj.thresh_mcscf
        
-	        @istate         = obj.get_state
-	        @max_iteration  = obj.get_max_iteration
-	        @energy_shift   = obj.get_energy_shift
+	        @istate         = obj.istate
+	        @max_iteration  = obj.max_iteration
+	        @energy_shift   = obj.energy_shift
       else  
       end
   end
@@ -306,3 +306,4 @@ class Molinfo
     @energy_shift
   end
 end
+

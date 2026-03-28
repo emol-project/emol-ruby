@@ -1,4 +1,5 @@
 require_relative './emol_nl'
+require_relative './emol_defaults'
 
 require "rexml/document"
 include REXML
@@ -203,53 +204,51 @@ class Mkinput
 
     ########################################################################
     nl = SimpleNameList.new( inp )
-    items = nl.parse
+    items = nl.parse_with_defaults( MKINPUT_DEFAULTS )
     ########################################################################
-    if ( items[ "runflg" ] ) then
-        @flg_int        = items[ "runflg" ][ "int"   ][ 0 ].to_i
-        @flg_rhf        = items[ "runflg" ][ "rhf"   ][ 0 ].to_i
-        @flg_trn        = items[ "runflg" ][ "trn"   ][ 0 ].to_i
-        @flg_expr       = items[ "runflg" ][ "expr"  ][ 0 ].to_i
-        @flg_ci         = items[ "runflg" ][ "ci"    ][ 0 ].to_i
-        @flg_mcscf      = items[ "runflg" ][ "mcscf" ][ 0 ].to_i
-    end
+    # After merge_defaults, all sections/keys defined in MKINPUT_DEFAULTS
+    # are guaranteed to exist.  nl_fetch provides a second safety net:
+    # if a key is still missing (e.g. omitted from MKINPUT_DEFAULTS),
+    # it prints a warning and returns a safe fallback instead of crashing.
 
-    if ( items[ "mol" ] ) then
-        @charge         = items[ "mol" ][ "charge"    ][ 0 ].to_f
-        @thresh_hf      = items[ "mol" ][ "thresh_hf" ][ 0 ].to_f
-        if ( items[ "mol" ][ "basis" ] ) then
-            @name_basis = items[ "mol" ][ "basis"    ][ 0 ]
-        else
-            @name_basis = nil
-        end
-        atom_and_xyz    = items[ "mol" ][ "atom_xyz" ]
-        @numb_atm       = atom_and_xyz.length / 4
-        @angular_type   = items[ "mol" ][ "angular_type" ][ 0 ].to_i
-    end
+    # --- $runflg ---
+    @flg_int        = SimpleNameList.nl_fetch( items, "runflg", "int"   )[0].to_i
+    @flg_rhf        = SimpleNameList.nl_fetch( items, "runflg", "rhf"   )[0].to_i
+    @flg_trn        = SimpleNameList.nl_fetch( items, "runflg", "trn"   )[0].to_i
+    @flg_expr       = SimpleNameList.nl_fetch( items, "runflg", "expr"  )[0].to_i
+    @flg_ci         = SimpleNameList.nl_fetch( items, "runflg", "ci"    )[0].to_i
+    @flg_mcscf      = SimpleNameList.nl_fetch( items, "runflg", "mcscf" )[0].to_i
+
+    # --- $mol ---
+    @charge         = SimpleNameList.nl_fetch( items, "mol", "charge"       )[0].to_f
+    @thresh_hf      = SimpleNameList.nl_fetch( items, "mol", "thresh_hf"    )[0].to_f
+    basis_val       = SimpleNameList.nl_fetch( items, "mol", "basis", true )
+    @name_basis     = basis_val.empty? ? nil : basis_val[0]   # basis has no default by design
+    atom_and_xyz    = SimpleNameList.nl_fetch( items, "mol", "atom_xyz", true )
+    @numb_atm       = atom_and_xyz.length / 4
+    @angular_type   = SimpleNameList.nl_fetch( items, "mol", "angular_type" )[0].to_i
+
     l_name              = (@angular_type == 1) ? l_name_sph : l_name_cart
     l_degeneracy        = (@angular_type == 1) ? l_degeneracy_sph : l_degeneracy_cart
 
-    if ( items[ "expr" ] ) then
-        @spin           = items[ "expr"  ][ "spin"     ][ 0 ].to_i
-        @n_frozen       = items[ "expr"  ][ "fzcore"   ][ 0 ].to_i
-        @n_core         = items[ "expr"  ][ "core"     ][ 0 ].to_i
-        @n_active       = items[ "expr"  ][ "active"   ][ 0 ].to_i
-        @n_external     = items[ "expr"  ][ "external" ][ 0 ].to_i
-        @flg_use_symbol = items[ "expr"  ][ "flg_use_symbol" ][ 0 ].to_i
-        @flg_use_csymb  = items[ "expr"  ][ "flg_use_csymb"  ][ 0 ].to_i
-    end
+    # --- $expr ---
+    @spin           = SimpleNameList.nl_fetch( items, "expr", "spin"           )[0].to_i
+    @n_frozen       = SimpleNameList.nl_fetch( items, "expr", "fzcore"         )[0].to_i
+    @n_core         = SimpleNameList.nl_fetch( items, "expr", "core"           )[0].to_i
+    @n_active       = SimpleNameList.nl_fetch( items, "expr", "active"         )[0].to_i
+    @n_external     = SimpleNameList.nl_fetch( items, "expr", "external"       )[0].to_i
+    @flg_use_symbol = SimpleNameList.nl_fetch( items, "expr", "flg_use_symbol" )[0].to_i
+    @flg_use_csymb  = SimpleNameList.nl_fetch( items, "expr", "flg_use_csymb"  )[0].to_i
 
-    if ( items[ "ci" ] ) then
-        @nstate         = items[ "ci"  ][ "nstate"   ][ 0 ].to_i
-        @thresh_ci      = items[ "ci"  ][ "thresh_ci"    ][ 0 ].to_f
-    end
+    # --- $ci ---
+    @nstate         = SimpleNameList.nl_fetch( items, "ci", "nstate"    )[0].to_i
+    @thresh_ci      = SimpleNameList.nl_fetch( items, "ci", "thresh_ci" )[0].to_f
 
-    if ( items[ "mcscf" ] ) then
-       @istate         = items[ "mcscf"  ][ "istate"   ][ 0 ].to_i
-       @max_iteration  = items[ "mcscf"  ][ "max_iteration" ][ 0 ].to_i
-       @thresh_mcscf   = items[ "mcscf"  ][ "thresh_mcscf"  ][ 0 ].to_f
-       @energy_shift   = items[ "mcscf"  ][ "energy_shift"  ][ 0 ].to_f
-    end
+    # --- $mcscf ---
+    @istate         = SimpleNameList.nl_fetch( items, "mcscf", "istate"        )[0].to_i
+    @max_iteration  = SimpleNameList.nl_fetch( items, "mcscf", "max_iteration" )[0].to_i
+    @thresh_mcscf   = SimpleNameList.nl_fetch( items, "mcscf", "thresh_mcscf"  )[0].to_f
+    @energy_shift   = SimpleNameList.nl_fetch( items, "mcscf", "energy_shift"  )[0].to_f
     ########################################################################
     @atom_name = []
     @atom_charg = []
@@ -691,3 +690,4 @@ class Mkinput
     printf(fmt + br, ary_last)     
   end
 end
+
