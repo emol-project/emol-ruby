@@ -51,7 +51,7 @@ end
 
 printf( "Atomic Orbital Populations:\n" ) ;
 for i in 0...nao do
-    printf( "%4d %s %f\n", i, aoname[ i ], pop_ao[ i ] )
+    printf( "%6d %-10s %f\n", i, aoname[ i ], pop_ao[ i ] )
 end
 
 printf( "Atomic Populations:\n" ) ;

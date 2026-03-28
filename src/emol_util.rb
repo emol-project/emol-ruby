@@ -71,51 +71,65 @@ module EmolUtil
     row_size = ary[0].size; clm_size = ary.size
 #   row_size = value.size; clm_size = ary.size
 
+    # Determine the column width for bs_name dynamically so that
+    # entries like "O 1 D-2" or "O 1 F+3" do not break alignment.
+    name_width = 6
+    bs_name.each do | nm |
+        name_width = nm.length if nm.length > name_width
+    end
+    # Label column = "%5d" + " " + "%-Ns" + " " = 5 + 1 + name_width + 1
+    label_width = 5 + 1 + name_width + 1
+    header_indent = " " * label_width
+    value_indent  = " " * ( label_width + 2 )
+    name_fmt = "%-#{name_width}s"
+
     printf("\n  %20s \n", var)
     if row_size <= print_row_size
-      printf("               ")
+      printf( header_indent )
       ( 1..row_size ).each do | i |
           printf( "         %5d", i )
       end
-      printf("\n                 ")
+      printf("\n")
+      printf( value_indent )
 
       print_line(value, 0, row_size-2, " \n", value[row_size-1], fmt)
       for i in 0..clm_size-1
-        printf("%5d   ", i+1)
-        printf("%6s   ", bs_name[i])
+        printf("%5d ", i+1)
+        printf(name_fmt + " ", bs_name[i])
         print_line(ary[i], 0, row_size-2, " \n", ary[i][row_size-1], fmt)
       end
     else
       from = 0
 #     from = 1
       while row_size - from > print_row_size
-        printf("               ")
+        printf( header_indent )
       # print_line(num, from, print_row_size-2, " \n", value[from+print_row_size-1], "       %5d")
         ( from..(from + print_row_size - 1) ).each do | i |
             printf( "         %5d", i + 1 )
         end
         printf("\n")
-        printf("                 ")
+        printf( value_indent )
         print_line(value, from, print_row_size-2, " \n", value[from+print_row_size-1], fmt)
         for i in 0..clm_size-1
-          printf("%5d   ", i+1)
-          printf("%6s   ", bs_name[i])
+          printf("%5d ", i+1)
+          printf(name_fmt + " ", bs_name[i])
           print_line(ary[i], from, print_row_size-2, " \n", ary[i][from+print_row_size-1], fmt)
         end
         from += print_row_size
         printf("\n")
       end
 
-      printf("               ")
+      printf( header_indent )
       ( from..row_size-1 ).each do | i |
           printf( "         %5d", i + 1 )
       end
  #    print_line(num, from, print_row_size-2-from, " \n", value[from+print_row_size-1], "      %5d")
-      printf("\n                 ")
+      printf("\n")
+      printf( value_indent )
       print_line(value, from, row_size-2-from, " \n", value[row_size-1], fmt)
       for i in 0..clm_size-1
-        printf("%5d   ", i+1)
-        printf("%6s   ", bs_name[i])
+        printf("%5d ", i+1)
+        printf(name_fmt + " ", bs_name[i])
         print_line(ary[i], from, row_size-2-from, " \n", ary[i][row_size-1], fmt)
       end
     end
