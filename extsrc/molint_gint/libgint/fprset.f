@@ -1,0 +1,24 @@
+      SUBROUTINE FPRSET(TABG)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      COMMON/FPR/ISW
+      DIMENSION TABG(24,101)
+      ISW=1
+      N=24
+      DO 50 KN=1,101
+      A=DFLOAT(KN-1)*0.2D0
+      TERM=1.0D0/99.0D0
+      SUM=TERM
+      DO 2 I=1,100
+      TERM=TERM*A*2.0D0/DFLOAT(99+2*I)
+      IF(TERM.LT.1.0D-18) GO TO 3
+    2 SUM=SUM+TERM
+    3 CEX=DEXP(-A)
+      GTP=SUM*CEX
+      DO 4 I=2,50
+      NMI=51-I
+      GTP=(2.0D0*A*GTP+CEX)/DFLOAT(2*NMI-1)
+      IF(NMI.LE.N) TABG(NMI,KN)=GTP
+    4 CONTINUE
+   50 CONTINUE
+      RETURN
+      END
