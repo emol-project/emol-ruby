@@ -1,129 +1,134 @@
-require 'fileutils'
+# extconf.rb for Molint (GINT backend)
+#
+# Directory layout:
+#   molint/
+#     extconf.rb          <- this file
+#     molint_libgint.c
+#     fint_capi.h         <- copied here by: cd libgint && make
+#     libgint.a           <- built by:       cd libgint && make
+#     libgint/
+#       Makefile
+#       fint_capi.h
+#       fint_capi.c
+#       Fmtmake5.c
+#       *.f
+#
+# Usage:
+#   cd molint && ruby extconf.rb
+#   make                  # builds libgint.a, Molint.so, copies to ../../src/
+#
 require 'mkmf'
-create_makefile( 'Inttrans' )
 
-################################################
-################################################
-################################################
-uname                   = `uname`
-uname.chop!
-################################################
-dir_target              = "../../src/"
-fort_basenames          = [ "trnpp", "trnsps", "trnrr" ]
-include_additional_dir  = [ "./", "./include/", "./include/trn/", "${HOME}/include", "${HOME}/local/include", "/usr/local/include", "/opt/local/include", "/Library/Ruby/Site/1.8/universal-darwin11.0" ]
-library_additional_dir  = [ "./", "./lib", "./lib/trn", "${HOME}/lib", "${HOME}/local/lib", "/usr/local/lib", "/opt/local/lib", "/opt/local/lib/ruby/vendor_ruby/1.8/i686-darwin11/", "/opt/local/lib/ruby/vendor_ruby/1.8/", "/Library/Ruby/Site/1.8/universal-darwin11.0" ]
-library_additional_item = [ ]
-cc                      = "gcc"
-fc                      = "gfortran"
-fflags                  = "-fPIC -O3"
-echo                    = "echo"
-qadd                    = "V = 1\nQ1 = $(V:1=)\nQ = $(Q1:0=@)"
-vval                    = "1"
+here = __dir__
 
-###############
-srcfort_add = ""
-#fort_basenames.each do
-#    |basename|
-#    srcfort_add += " " + basename + ".f"
-#end
-##printf "%s\n", srcfort_add
-###############
-objfort_add = ""
-#fort_basenames.each do
-#    |basename|
-#    objfort_add += " " + basename + ".o"
-#end
-##printf "%s\n", objfort_add
-###############
-inc_add_flag = ""
-include_additional_dir.each do
-    |dir|
-    inc_add_flag += "-I" + dir + " "
-end
-#printf "%s\n", inc_add_flag
-##############
-lib_add_flag = ""
-library_additional_dir.each do
-    |dir|
-    lib_add_flag += "-L" + dir + " "
-end
-#printf "%s\n", inc_add_flag
-##############
-library_add_flag = ""
-library_additional_item.each do
-    |item|
-    library_add_flag += "-l" + item + " "
-end
-#printf "%s\n", library_add_flag
-##############
-file         = "Makefile"
-file_tmp     = "Makefile.tmp"
-sbst_echo    = "ECHO = "     + echo
-sbst_qadd    = ""            + qadd
-sbst_vval    = "V = "        + vval
-sbst_target  = "-o "         + dir_target + "$@"
-sbst_srcf    = "SRCF = "     + srcfort_add
-sbst_cc      = "CC = "       + cc
-sbst_fc      = "FC = "       + fc
-sbst_fflags  = "FFLAGS = "   + fflags
-sbst_include = "INCFLAGS = " + inc_add_flag
-sbst_libpath = "LIBPATH = "  + lib_add_flag
-sbst_library = "LIBS = "     + library_add_flag
-sbst_suffix0 = ".f.o:"
-sbst_suffix1 = "	$(ECHO) compiling $(<)"
-sbst_suffix2 = "	$(Q) $(FC) $(FFLAGS) -c $<"
+libgint_dir = File.join(here, 'libgint')
+libgint_a   = File.join(here, 'libgint.a')
 
-#printf "%s\n", sbst_include
+# ------------------------------------------------------------------
+# 1. Include path: current directory (for fint_capi.h)
+# ------------------------------------------------------------------
+$INCFLAGS += " -I#{here}"
 
-port_r = open( file,     "r" )
-port_w = open( file_tmp, "w" )
+# ------------------------------------------------------------------
+# 2. Link libgint.a (full path)
+# ------------------------------------------------------------------
+$LOCAL_LIBS += " #{libgint_a}"
 
-port_w.puts sbst_echo
-port_w.puts sbst_qadd
-begin
-    port_r.each_line { |line|
-        new_line = line
-        if ( uname == "Darwin" ) then
-            new_line = new_line.gsub( /-arch[ ][ ]*i386/, "" )
-            new_line = new_line.gsub( /-arch[ ][ ]*x86_64/, "" )
-            new_line = new_line.gsub( /-arch[ ][ ]*x86_64/, "" )
-            new_line = new_line.sub( /-Wshorten-64-to-32/, "" )
-            new_line = new_line.sub( /-Wdivision-by-zero/, "" )
-            new_line = new_line.sub( /-Wextra-tokens/, "" )
-        end
-        if new_line.index( /^CC =[ ][ ]*.*$/ ) then
-            new_line = new_line.sub( /^CC =[ ][ ]*.*$/,    sbst_cc      )
-            port_w.puts new_line
-            port_w.puts sbst_fc
-        elsif new_line.index( /^CFLAGS[ ][ ]*.*$/ ) then
-            port_w.puts new_line
-            port_w.puts sbst_fflags
-        elsif new_line.index( /^SRCS[ ][ ]*.*$/ ) then
-            port_w.puts new_line
-            port_w.puts sbst_srcf
-        elsif new_line.index( /^.*DLLIB.* Makefile$/ ) then
-#            puts new_line
-            port_w.puts sbst_suffix0
-            port_w.puts sbst_suffix1
-            port_w.puts sbst_suffix2
-            port_w.puts ""
-            port_w.puts new_line
-        elsif new_line.index( /^OBJS =[ ][ ]*/ ) then
-            new_line = new_line.chop + objfort_add
-            port_w.puts new_line
-        else
-            new_line = new_line.sub( /^V =[ ][ ]*.*/,      sbst_vval    )
-            new_line = new_line.sub( /-o[ ][ ]*\$@/,       sbst_target  )
-            new_line = new_line.sub( /^INCFLAGS =[ ][ ]*/, sbst_include )
-            new_line = new_line.sub( /^LIBPATH =[ ][ ]*/,  sbst_libpath )
-            new_line = new_line.sub( /^LIBS =[ ][ ]*/,     sbst_library )
-            new_line = new_line.sub( /^LIBS =[ ][ ]*/,     sbst_library )
-            port_w.puts new_line
-        end
-    }
-ensure
-    port_r.close
-    port_w.close
+# ------------------------------------------------------------------
+# 3. Link gfortran runtime and libm
+# ------------------------------------------------------------------
+def find_gfortran_lib(name)
+  path = `gfortran -print-file-name=#{name} 2>/dev/null`.strip
+  (path && path != name && File.exist?(path)) ? path : nil
 end
 
-FileUtils.mv( file_tmp, file )
+if RUBY_PLATFORM =~ /darwin/
+  %w[libgfortran.a libquadmath.a].each do |lib|
+    path = find_gfortran_lib(lib)
+    if path
+      $LOCAL_LIBS += " #{path}"
+    else
+      $libs = append_library($libs, lib.sub(/^lib/, '').sub(/\.a$/, ''))
+    end
+  end
+else
+  # Linux: try static first, fall back to -lgfortran
+  path = find_gfortran_lib('libgfortran.a')
+  if path
+    $LOCAL_LIBS += " #{path}"
+  else
+    $libs = append_library($libs, 'gfortran')
+  end
+  # quadmath may be needed on some Linux toolchains
+  qpath = find_gfortran_lib('libquadmath.a')
+  if qpath
+    $LOCAL_LIBS += " #{qpath}"
+  else
+    $libs = append_library($libs, 'quadmath')
+  end
+end
+
+$libs = append_library($libs, 'm')
+
+# ------------------------------------------------------------------
+# 4. Source files and headers
+# ------------------------------------------------------------------
+$srcs = %w[molint_libgint.c]
+$hdrs = %w[fint_capi.h]
+
+# ------------------------------------------------------------------
+# 5. Compiler flags
+# ------------------------------------------------------------------
+$CFLAGS += ' -O2 -std=c99 -fPIC'
+
+# ------------------------------------------------------------------
+# 6. Create Makefile
+# ------------------------------------------------------------------
+create_makefile('Molint')
+
+# ------------------------------------------------------------------
+# 7. Patch the generated Makefile:
+#    a) Rewrite 'all:' to include build_libgint and install_to_src
+#    b) Append the extra rules
+# ------------------------------------------------------------------
+target_dir = File.expand_path('../../src', here)
+so_ext     = (RUBY_PLATFORM =~ /darwin/) ? 'bundle' : 'so'
+
+makefile = File.read('Makefile')
+
+# mkmf generates a line like:  all: $(DLLIB)
+# Rewrite to:  all: build_libgint $(DLLIB) install_to_src
+makefile.sub!(/^all:(.*)$/) do
+  deps = $1.strip.split
+              .reject { |d| ['build_libgint', 'install_to_src'].include?(d) }
+              .join(' ')
+  "all: build_libgint #{deps} install_to_src"
+end
+
+File.write('Makefile', makefile)
+
+# Append extra rules
+File.open('Makefile', 'a') do |f|
+  f.puts
+  f.puts '# --- libgint build rules (inserted by extconf.rb) ---'
+  f.puts "LIBGINT_DIR = #{libgint_dir}"
+  f.puts "LIBGINT_A   = #{libgint_a}"
+  f.puts
+  f.puts '.PHONY: build_libgint clean-libgint install_to_src'
+  f.puts
+  f.puts 'build_libgint:'
+  f.puts "\t$(MAKE) -C $(LIBGINT_DIR)"
+  f.puts
+  f.puts 'clean-libgint:'
+  f.puts "\t$(MAKE) -C $(LIBGINT_DIR) clean"
+  f.puts
+  f.puts 'clean: clean-libgint'
+  f.puts
+  f.puts '# --- post-build copy ---'
+  f.puts "TARGET_DIR = #{target_dir}"
+  f.puts
+  f.puts 'install_to_src: $(DLLIB)'
+  f.puts "\t@mkdir -p $(TARGET_DIR)"
+  f.puts "\t@cp $(DLLIB) $(TARGET_DIR)/"
+  f.puts "\t@echo '>>> Molint.#{so_ext} copied to $(TARGET_DIR)/'"
+end
