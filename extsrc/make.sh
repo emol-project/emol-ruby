@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MODULES='molint trn wig symbolic'
+MODULES='molint_libcint trn wig symbolic'
 OPT=
 #RUBY=$HOME/ruby-2.4.1/bin/ruby
 RUBY=ruby

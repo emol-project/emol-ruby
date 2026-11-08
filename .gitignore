@@ -1,0 +1,18 @@
+# build products of the C extensions
+*.o
+*.so
+*.bundle
+*.dll
+mkmf.log
+extsrc/molint_libcint/Makefile
+extsrc/symbolic/Makefile
+extsrc/trn/Makefile
+extsrc/wig/Makefile
+
+# intermediate files written by the tutorials
+Data_*
+
+# editor files
+*~
+*.swp
+.*.swp

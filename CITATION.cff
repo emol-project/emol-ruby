@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "EMOL: Molecular orbital calculation program for educational or prototyping environment"
+abstract: "A prototype molecular orbital program in Ruby with C extensions (libcint-based integrals, RHF/UHF, integral transformation, MP2, DRT-based CI, super-CI CASSCF). The CSF-based Hamiltonian matrix element expressions later developed into the hexpr library were first implemented and tested in EMOL."
+type: software
+version: 1.0.0
+license: LGPL-3.0-or-later
+repository-code: "https://github.com/hh076/EMOL"
+url: "https://github.com/hh076/EMOL"
+authors:
+  - family-names: Honda
+    given-names: Hiroaki
+    orcid: "https://orcid.org/0009-0004-7674-5540"
+  - family-names: Noro
+    given-names: Takeshi
+keywords:
+  - quantum chemistry
+  - configuration interaction
+  - Ruby

@@ -1,10 +1,9 @@
 // ====================================================================
 // 
-//      Hiroaki HONDA, Yu-ichi INADOMI, and Jun MAKI
+//      EMOL: Hiroaki HONDA
 // 
-//      All rights reserved since Aug. 21th 2008.
-//      RHF Part of OpenFMO project: http://www.openfmo.org
-//      Correspondence: dahon@c.csce.kyushu-u.ac.jp
+//      SPDX-License-Identifier: LGPL-3.0-or-later
+//      See COPYING.LESSER and COPYING in the top directory.
 // ====================================================================
 
 #ifndef _INCLUDE_PSI_STAN_HGMAT_

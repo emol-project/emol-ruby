@@ -22,8 +22,8 @@ require 'gsl'
 #
 #Authors::   tashi
 #Version::   1.0 2015-12-01
-#Copyright:: Copyright (C) Sapporo QC, 2015. All rights reserved.
-#License::   Ruby ライセンスに準拠
+#Copyright:: Copyright (C) Sapporo QC, 2015.
+#License::   LGPL-3.0-or-later (see COPYING.LESSER and COPYING)
 #
 #= 要求される中間ファイル
 # 1. Data_molinfo: 分子状態情報
