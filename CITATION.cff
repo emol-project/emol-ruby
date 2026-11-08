@@ -5,8 +5,8 @@ abstract: "A prototype molecular orbital program in Ruby with C extensions (libc
 type: software
 version: 1.0.0
 license: LGPL-3.0-or-later
-repository-code: "https://github.com/hh076/EMOL"
-url: "https://github.com/hh076/EMOL"
+repository-code: "https://github.com/emol-project/emol-ruby"
+url: "https://github.com/emol-project/emol-ruby"
 authors:
   - family-names: Honda
     given-names: Hiroaki
